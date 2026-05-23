@@ -88,6 +88,28 @@ from helpers.msg import (
 
 from config import PyroConf
 from logger import LOGGER
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import threading
+
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
+        self.wfile.write(b"Bot is running successfully!")
+
+    def log_message(self, format, *args):
+        # Silence HTTP request logs in the console
+        pass
+
+def run_health_server():
+    port = int(os.environ.get("PORT", 7860))
+    try:
+        server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
+        LOGGER(__name__).info(f"Health check server started on port {port}")
+        server.serve_forever()
+    except Exception as e:
+        LOGGER(__name__).error(f"Failed to start health check server: {e}")
 
 # Initialize the bot client
 bot = Client(
@@ -1327,6 +1349,10 @@ async def initialize():
 
 async def start_bot():
     LOGGER(__name__).info("Bot Starting...")
+    
+    # Start background health check server for cloud deployments (e.g. Hugging Face Spaces)
+    threading.Thread(target=run_health_server, daemon=True).start()
+    
     await user.start()
     await bot.start()
     await initialize()

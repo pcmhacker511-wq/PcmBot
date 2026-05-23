@@ -17,4 +17,6 @@ RUN pip install -U -r requirements.txt
 
 COPY . /app
 
+EXPOSE 7860
+
 CMD ["python3", "main.py"]

@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     environment:
       - TZ=Asia/Dhaka
+    ports:
+      - "7860:7860"
     restart: always
     volumes:
       - .:/app
