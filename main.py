@@ -1012,7 +1012,7 @@ async def contact_command_handler(_, message: Message):
     )
 
 
-@bot.on_message(filters.private & ~filters.command(["start", "help", "dl", "bdl", "stats", "logs", "killall", "cleanup", "cancel", "batch", "contact", "report", "login", "logout"]))
+@bot.on_message(filters.private & filters.incoming & ~filters.command(["start", "help", "dl", "bdl", "stats", "logs", "killall", "cleanup", "cancel", "batch", "contact", "report", "login", "logout"]))
 async def handle_any_message(bot: Client, message: Message):
     user_id = message.from_user.id
     
