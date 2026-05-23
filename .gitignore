@@ -3,6 +3,7 @@
 *.vscode*
 .env
 config.env.local
+config.env
 *.log
 *.json
 *.html
@@ -15,3 +16,4 @@ Assets
 logs.txt
 *.db
 users.db
+
