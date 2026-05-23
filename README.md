@@ -1,4 +1,14 @@
+---
+title: PcmBot
+emoji: 🤖
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+---
+
 <h1 align="center">Restricted Content Downloader Telegram Bot</h1>
+
 
 <p align="center">
   <a href="https://github.com/bisnuray/RestrictedContentDL/stargazers"><img src="https://img.shields.io/github/stars/bisnuray/RestrictedContentDL?color=blue&style=flat" alt="GitHub Repo stars"></a>
