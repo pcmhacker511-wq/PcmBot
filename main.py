@@ -441,7 +441,20 @@ async def prefetch_worker(start_chat, msg_ids_queue, downloaded_data, status_tra
         status_tracker[msg_id] = "downloading"
         
         try:
-            chat_msg = await user_client.get_messages(chat_id=start_chat, message_ids=msg_id)
+            # 1. Fetch the message with FloodWait retry loop
+            chat_msg = None
+            for attempt in range(3):
+                try:
+                    chat_msg = await user_client.get_messages(chat_id=start_chat, message_ids=msg_id)
+                    break
+                except FloodWait as e:
+                    wait_s = int(getattr(e, "value", 0) or 0)
+                    LOGGER(__name__).warning(f"FloodWait while prefetching message {msg_id}: {wait_s}s")
+                    if wait_s > 0 and attempt < 2:
+                        await asyncio.sleep(wait_s + 2)
+                        continue
+                    raise
+
             if not chat_msg:
                 downloaded_data[msg_id] = {"status": "skipped"}
                 status_tracker[msg_id] = "skipped"
@@ -486,10 +499,23 @@ async def prefetch_worker(start_chat, msg_ids_queue, downloaded_data, status_tra
             
             DOWNLOAD_PROGRESS[msg_id] = "`0.0%`"
             
-            media_path = await chat_msg.download(
-                file_name=download_path,
-                progress=progress
-            )
+            # 2. Download the media with FloodWait retry loop
+            media_path = None
+            for attempt in range(3):
+                try:
+                    media_path = await chat_msg.download(
+                        file_name=download_path,
+                        progress=progress
+                    )
+                    break
+                except FloodWait as e:
+                    wait_s = int(getattr(e, "value", 0) or 0)
+                    LOGGER(__name__).warning(f"FloodWait while downloading media for msg {msg_id}: {wait_s}s")
+                    if wait_s > 0 and attempt < 2:
+                        await asyncio.sleep(wait_s + 2)
+                        continue
+                    raise
+
             if not media_path or not os.path.exists(media_path) or os.path.getsize(media_path) == 0:
                 if media_path:
                     cleanup_download(media_path)
