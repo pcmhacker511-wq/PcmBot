@@ -13,3 +13,5 @@ osgrep
 downloads
 Assets
 logs.txt
+*.db
+users.db
