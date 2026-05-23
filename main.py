@@ -564,10 +564,11 @@ async def run_interactive_batch(bot: Client, message: Message, start_link: str, 
     for msg_id in range(start_id, end_id + 1):
         await msg_queue.put(msg_id)
         
-    # Start 1 background prefetch worker for sequential downloading at maximum single-file speed
+    # Start concurrent background prefetch workers for maximum parallel speed
+    num_workers = max(3, PyroConf.MAX_CONCURRENT_DOWNLOADS)
     workers = [
         asyncio.create_task(prefetch_worker(start_chat, msg_queue, downloaded_data, status_tracker, message))
-        for _ in range(1)
+        for _ in range(num_workers)
     ]
     
     downloaded = skipped = failed = 0
